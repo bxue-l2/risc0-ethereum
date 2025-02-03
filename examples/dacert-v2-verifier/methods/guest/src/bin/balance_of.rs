@@ -124,7 +124,7 @@ fn main() {
         blobInclusionInfo: blobInclusionInfo,
         nonSignerStakesAndSignature: nonSignerStakesAndSignature,
     };
-    let _ = Contract::new(contract, &env).call_builder(&call).call();
+    let returns = Contract::new(contract, &env).call_builder(&call).call();
     // attest it to equal to expected result
     assert!(returns._0 == true);
 
