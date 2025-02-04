@@ -91,7 +91,7 @@ struct Args {
     /// Address of the EigenDA verifier contract
     /// used to preflight the contract only
     #[clap(long)]
-    verifier_contract: Address,
+    cert_verifier_contract: Address,
 }
 
 #[tokio::main]
@@ -127,6 +127,8 @@ async fn main() -> Result<()> {
     //  The `with_chain_spec` method is used to specify the chain configuration.
     env = env.with_chain_spec(&ETH_HOLESKY_CHAIN_SPEC);
 
+    let expected_returns = true;
+
     let batch_header_rlp = fs::read("batch_header.rlp")
         .expect("Should have been able to read the file");
     let non_signer_rlp = fs::read("non_signer.rlp")
@@ -134,7 +136,7 @@ async fn main() -> Result<()> {
     let blob_inclusion_rlp = fs::read("blob_inclusion.rlp")
         .expect("Should have been able to read the file");
     // given the above abi is correct
-    let expected_result_abi = false.abi_encode();
+    let expected_result_abi = expected_returns.abi_encode();
 
     let batch_header = v2_cert::parse_batch_header(&batch_header_rlp);
     let non_signer = v2_cert::parse_non_signer(&non_signer_rlp);
@@ -153,9 +155,9 @@ async fn main() -> Result<()> {
 
     // Preflight the call to prepare the input that is required to execute the function in
     // the guest without RPC access. It also returns the result of the call.
-    let mut contract = Contract::preflight(args.verifier_contract, &mut env);
+    let mut contract = Contract::preflight(args.cert_verifier_contract, &mut env);
     let returns = contract.call_builder(&call).call().await?._0;
-    assert!(returns == true);
+    assert!(returns == expected_returns);
 
     // Finally, construct the input from the environment.
     // There are two options: Use EIP-4788 for verification by providing a Beacon API endpoint,
@@ -166,7 +168,7 @@ async fn main() -> Result<()> {
     let prove_info = task::spawn_blocking(move || {
         let env = ExecutorEnv::builder()
             .write(&evm_input)?
-            .write(&args.verifier_contract)?
+            .write(&args.cert_verifier_contract)?
             .write(&batch_header_abi)?
             .write(&non_signer_abi)?
             .write(&blob_inclusion_abi)?

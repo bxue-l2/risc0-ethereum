@@ -104,8 +104,8 @@ fn main() {
     let input: EthEvmInput = env::read();
     let contract: Address = env::read();
     let batchHeader_abi: Vec<u8> = env::read();
-    let blobInclusionInfo_abi: Vec<u8> = env::read();
     let nonSignerStakesAndSignature_abi: Vec<u8> = env::read();
+    let blobInclusionInfo_abi: Vec<u8> = env::read();       
     let expected_result_abi: Vec<u8> = env::read();
     // take another input called expected result
 
