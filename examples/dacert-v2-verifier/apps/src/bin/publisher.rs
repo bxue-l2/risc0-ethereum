@@ -28,7 +28,7 @@ use clap::Parser;
 use erc20_counter_methods::{BALANCE_OF_ELF, BALANCE_OF_ID};
 use risc0_ethereum_contracts::encode_seal;
 use risc0_steel::{
-    ethereum::{EthEvmEnv, ETH_SEPOLIA_CHAIN_SPEC},
+    ethereum::{EthEvmEnv, ETH_HOLESKY_CHAIN_SPEC},
     host::BlockNumberOrTag,
     Commitment, Contract,
 };
@@ -45,7 +45,7 @@ use eigenda_v2_struct_rust::v2_cert::sol_struct::{IEigenDACertVerifier};
 alloy::sol! {
     struct Journal {
         Commitment commitment;
-        address tokenContract;
+        address verifierContract;
     }
 }
 
@@ -87,13 +87,9 @@ struct Args {
     #[clap(long)]
     counter_address: Address,
 
-    /// Address of the ERC20 token contract
+    /// Address of the EigenDA verifier contract
     #[clap(long)]
-    token_contract: Address,
-
-    /// Address to query the token balance of
-    #[clap(long)]
-    account: Address,
+    verifier_contract: Address,
 }
 
 #[tokio::main]
@@ -127,7 +123,7 @@ async fn main() -> Result<()> {
 
     let mut env = builder.build().await?;
     //  The `with_chain_spec` method is used to specify the chain configuration.
-    env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+    env = env.with_chain_spec(&ETH_HOLESKY_CHAIN_SPEC);
 
     let batch_header_rlp = fs::read("batch_header.rlp")
         .expect("Should have been able to read the file");
@@ -153,7 +149,7 @@ async fn main() -> Result<()> {
 
     // Preflight the call to prepare the input that is required to execute the function in
     // the guest without RPC access. It also returns the result of the call.
-    let mut contract = Contract::preflight(args.token_contract, &mut env);
+    let mut contract = Contract::preflight(args.verifier_contract, &mut env);
     let returns = contract.call_builder(&call).call().await?._0;
     assert!(returns == true);
 
@@ -166,7 +162,7 @@ async fn main() -> Result<()> {
     let prove_info = task::spawn_blocking(move || {
         let env = ExecutorEnv::builder()
             .write(&evm_input)?
-            .write(&args.token_contract)?
+            .write(&args.verifier_contract)?
             .write(&batch_header_abi)?
             .write(&non_signer_abi)?
             .write(&blob_inclusion_abi)?

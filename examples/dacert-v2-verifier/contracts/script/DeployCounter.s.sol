@@ -39,19 +39,12 @@ contract DeployCounter is Script, RiscZeroCheats {
         vm.startBroadcast(deployerKey);
 
         IERC20Metadata tokenContract = IERC20Metadata(address(0x0));
-        try vm.envAddress("TOKEN_CONTRACT") returns (address val) {
-            tokenContract = IERC20Metadata(val);
-            console2.log("Using ERC20", tokenContract.name(), "at", address(tokenContract));
-        } catch {
-            // deploy a new ERC20 token if no contract has been specified
-            address owner = vm.envAddress("TOKEN_OWNER");
-            tokenContract = new ERC20FixedSupply("TOYKEN", "TOY", owner);
-            console2.log("Deployed ERC20 TOYKEN to", address(tokenContract));
-        }
+  
+        // holesky verifier router  address
+        IRiscZeroVerifier verifier = IRiscZeroVerifier(0xAC292cF957Dd5BA174cdA13b05C16aFC71700327);
 
-        IRiscZeroVerifier verifier = deployRiscZeroVerifier();
-
-        Counter counter = new Counter(verifier, address(tokenContract));
+        // eigenda Cert verifier address
+        Counter counter = new Counter(verifier, address(0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C));
         console2.log("Deployed Counter to", address(counter));
 
         vm.stopBroadcast();
