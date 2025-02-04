@@ -106,11 +106,13 @@ fn main() {
     let batchHeader_abi: Vec<u8> = env::read();
     let blobInclusionInfo_abi: Vec<u8> = env::read();
     let nonSignerStakesAndSignature_abi: Vec<u8> = env::read();
+    let expected_result_abi: Vec<u8> = env::read();
     // take another input called expected result
 
     let batchHeader = BatchHeaderV2::abi_decode(&batchHeader_abi, true).unwrap();
     let blobInclusionInfo = BlobInclusionInfo::abi_decode(&blobInclusionInfo_abi, true).unwrap();
     let nonSignerStakesAndSignature = NonSignerStakesAndSignature::abi_decode(&nonSignerStakesAndSignature_abi, true).unwrap();
+    let expected_result = bool::abi_decode(&expected_result_abi, true).unwrap();
 
     // Converts the input into a `EvmEnv` for execution. The `with_chain_spec` method is used
     // to specify the chain configuration. It checks that the state matches the state root in the
@@ -123,9 +125,10 @@ fn main() {
         blobInclusionInfo: blobInclusionInfo,
         nonSignerStakesAndSignature: nonSignerStakesAndSignature,
     };
+
     let returns = Contract::new(contract, &env).call_builder(&call).call();
     // attest it to equal to expected result
-    assert!(returns._0 == true);
+    assert!(returns._0 == expected_result);
 
     // Commit the block hash and number used when deriving `view_call_env` to the journal.
     let journal = Journal {

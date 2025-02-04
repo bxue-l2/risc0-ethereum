@@ -33,7 +33,7 @@ fn main() {
 
     // Generate Rust source files for the methods crate.
     let guests = embed_methods_with_options(HashMap::from([(
-        "erc20-counter-guests",
+        "dacert-v2-verifier-guests",
         GuestOptions {
             features: Vec::new(),
             use_docker,

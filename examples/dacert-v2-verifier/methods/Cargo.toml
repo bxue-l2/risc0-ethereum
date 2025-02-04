@@ -1,5 +1,5 @@
 [package]
-name = "erc20-counter-methods"
+name = "dacert-v2-verifier-methods"
 version = { workspace = true }
 edition = { workspace = true }
 

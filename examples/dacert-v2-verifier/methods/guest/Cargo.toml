@@ -1,11 +1,11 @@
 [package]
-name = "erc20-counter-guests"
+name = "dacert-v2-verifier-guests"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "balance_of"
-path = "src/bin/balance_of.rs"
+name = "dacert_v2_verifier"
+path = "src/bin/dacert_v2_verifier.rs"
 
 [workspace]
 

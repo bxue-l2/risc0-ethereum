@@ -718,8 +718,8 @@ dependencies = [
  "alloy-primitives 0.8.14",
  "anyhow",
  "clap",
+ "dacert-v2-verifier-methods",
  "eigenda-v2-struct-rust",
- "erc20-counter-methods",
  "log",
  "risc0-ethereum-contracts",
  "risc0-steel",
@@ -1507,6 +1507,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "dacert-v2-verifier-methods"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.8.14",
+ "alloy-sol-types",
+ "hex",
+ "risc0-build",
+ "risc0-build-ethereum",
+ "risc0-zkp",
+ "risc0-zkvm",
+]
+
+[[package]]
 name = "dashmap"
 version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1808,19 +1821,6 @@ name = "equivalent"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
-
-[[package]]
-name = "erc20-counter-methods"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives 0.8.14",
- "alloy-sol-types",
- "hex",
- "risc0-build",
- "risc0-build-ethereum",
- "risc0-zkp",
- "risc0-zkvm",
-]
 
 [[package]]
 name = "errno"

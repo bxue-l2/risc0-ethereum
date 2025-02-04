@@ -25,7 +25,8 @@ use alloy::{
 use alloy_primitives::{Address, U256};
 use anyhow::{ensure, Context, Result};
 use clap::Parser;
-use erc20_counter_methods::{BALANCE_OF_ELF, BALANCE_OF_ID};
+//use dacert_v2_verifier_methods::{BALANCE_OF_ELF, BALANCE_OF_ID};
+use dacert_v2_verifier_methods::{DACERT_V2_VERIFIER_ELF, DACERT_V2_VERIFIER_ID};
 use risc0_ethereum_contracts::encode_seal;
 use risc0_steel::{
     ethereum::{EthEvmEnv, ETH_HOLESKY_CHAIN_SPEC},
@@ -88,6 +89,7 @@ struct Args {
     counter_address: Address,
 
     /// Address of the EigenDA verifier contract
+    /// used to preflight the contract only
     #[clap(long)]
     verifier_contract: Address,
 }
@@ -131,6 +133,8 @@ async fn main() -> Result<()> {
         .expect("Should have been able to read the file");
     let blob_inclusion_rlp = fs::read("blob_inclusion.rlp")
         .expect("Should have been able to read the file");
+    // given the above abi is correct
+    let expected_result_abi = false.abi_encode();
 
     let batch_header = v2_cert::parse_batch_header(&batch_header_rlp);
     let non_signer = v2_cert::parse_non_signer(&non_signer_rlp);
@@ -139,7 +143,7 @@ async fn main() -> Result<()> {
     let batch_header_abi = batch_header.abi_encode();
     let non_signer_abi = non_signer.abi_encode();
     let blob_inclusion_abi = blob_inclusion.abi_encode();
-
+    
     // Prepare the function call
     let call = IEigenDACertVerifier::verifyDACertV2ForZKProofCall {
         batchHeader: batch_header,
@@ -166,13 +170,14 @@ async fn main() -> Result<()> {
             .write(&batch_header_abi)?
             .write(&non_signer_abi)?
             .write(&blob_inclusion_abi)?
+            .write(&expected_result_abi)?
             .build()
             .unwrap();
 
         default_prover().prove_with_ctx(
             env,
             &VerifierContext::default(),
-            BALANCE_OF_ELF,
+            DACERT_V2_VERIFIER_ELF,
             &ProverOpts::groth16(),
         )
     })
@@ -193,7 +198,7 @@ async fn main() -> Result<()> {
 
     // Call ICounter::imageID() to check that the contract has been deployed correctly.
     let contract_image_id = Digest::from(contract.imageID().call().await?._0.0);
-    ensure!(contract_image_id == Digest::from(BALANCE_OF_ID));
+    ensure!(contract_image_id == Digest::from(DACERT_V2_VERIFIER_ID));
 
     // Call the increment function of the contract and wait for confirmation.
     log::info!(
