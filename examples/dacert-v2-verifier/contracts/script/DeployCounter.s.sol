@@ -41,10 +41,10 @@ contract DeployCounter is Script, RiscZeroCheats {
         IERC20Metadata tokenContract = IERC20Metadata(address(0x0));
   
         // holesky verifier router  address
-        IRiscZeroVerifier verifier = IRiscZeroVerifier(0xAC292cF957Dd5BA174cdA13b05C16aFC71700327);
+        IRiscZeroVerifier verifier = IRiscZeroVerifier(0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C);
 
         // eigenda Cert verifier address
-        Counter counter = new Counter(verifier, address(0xf70aBAb028Eb6F4100A24B203E113D94E87DE93C));
+        Counter counter = new Counter(verifier, address(0x46D91A257B70E4784a9c5538E1456a84ba6A41Ee));
         console2.log("Deployed Counter to", address(counter));
 
         vm.stopBroadcast();

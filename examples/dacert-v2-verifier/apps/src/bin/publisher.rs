@@ -110,22 +110,13 @@ async fn main() -> Result<()> {
         .wallet(wallet)
         .on_http(args.eth_rpc_url);
 
+    let view_at_execution_block = args.execution_block;
+
     #[cfg(feature = "beacon")]
-    log::info!("Beacon commitment to block {}", args.execution_block);
+    log::info!("Beacon commitment to block {}", view_at_execution_block);
     #[cfg(feature = "history")]
     log::info!("History commitment to block {}", args.commitment_block);
 
-    let builder = EthEvmEnv::builder()
-        .provider(provider.clone())
-        .block_number_or_tag(args.execution_block);
-    #[cfg(any(feature = "beacon", feature = "history"))]
-    let builder = builder.beacon_api(args.beacon_api_url);
-    #[cfg(feature = "history")]
-    let builder = builder.commitment_block(args.commitment_block);
-
-    let mut env = builder.build().await?;
-    //  The `with_chain_spec` method is used to specify the chain configuration.
-    env = env.with_chain_spec(&ETH_HOLESKY_CHAIN_SPEC);
 
     let expected_returns = true;
 
@@ -135,8 +126,20 @@ async fn main() -> Result<()> {
         .expect("Should have been able to read the file");
     let blob_inclusion_rlp = fs::read("blob_inclusion.rlp")
         .expect("Should have been able to read the file");
-    // given the above abi is correct
-    let expected_result_abi = expected_returns.abi_encode();
+    
+
+    let builder = EthEvmEnv::builder()
+        .provider(provider.clone())
+        .block_number_or_tag(view_at_execution_block);
+    #[cfg(any(feature = "beacon", feature = "history"))]
+    let builder = builder.beacon_api(args.beacon_api_url);
+    #[cfg(feature = "history")]
+    let builder = builder.commitment_block(args.commitment_block);
+
+    let mut env = builder.build().await?;
+    //  The `with_chain_spec` method is used to specify the chain configuration.
+    env = env.with_chain_spec(&ETH_HOLESKY_CHAIN_SPEC);
+    
 
     let batch_header = v2_cert::parse_batch_header(&batch_header_rlp);
     let non_signer = v2_cert::parse_non_signer(&non_signer_rlp);
@@ -145,6 +148,8 @@ async fn main() -> Result<()> {
     let batch_header_abi = batch_header.abi_encode();
     let non_signer_abi = non_signer.abi_encode();
     let blob_inclusion_abi = blob_inclusion.abi_encode();
+
+    let expected_result_abi = expected_returns.abi_encode();
     
     // Prepare the function call
     let call = IEigenDACertVerifier::verifyDACertV2ForZKProofCall {
